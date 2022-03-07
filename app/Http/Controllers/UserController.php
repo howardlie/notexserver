@@ -73,4 +73,19 @@ class UserController extends Controller
 
         return response()->json(compact('user'));
     }
+
+    public function removeAllAccess() {
+        // remove all access token from DB except the one logged in
+        return response()->json(['status' => "OK"]);
+    }
+
+    public function listAccess() {
+        //get all token with same account from logged in
+
+        return response()->json(['status' => 'OK', 'data' => [
+            'devices' => [
+                ['device_name' => 'Asus X00TD', 'id' => 1, 'created_at' => 'date'],
+            ]]
+        ]);
+    }
 }

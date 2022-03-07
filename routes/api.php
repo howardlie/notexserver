@@ -21,9 +21,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 //Route::group(['middleware' => ['jwt.verify']], function() {
-Route::get('/devices/removeaccess', 'UserController@removeAccess');
+Route::get('/devices/removeaccess', 'UserController@removeAllAccess'); // Response "OK"
 Route::get('/notes/getShared/{id}', "NotesController@getShared");
-Route::get('/notes', [NotesController::class, 'index']);
+Route::post('/notes/sync', 'NotesController@sync');
 Route::get('/devices', 'UserController@listAccess');
 //});
 Route::post('/authenticate', 'UserController@login');
