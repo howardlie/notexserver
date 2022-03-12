@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotesController;
-
+use App\Http\Controllers\UserController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -20,10 +20,15 @@ use App\Http\Controllers\NotesController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-//Route::group(['middleware' => ['jwt.verify']], function() {
-Route::get('/devices/removeaccess', 'UserController@removeAllAccess'); // Response "OK"
-Route::get('/notes/getShared/{id}', "NotesController@getShared");
-Route::post('/notes/sync', 'NotesController@sync');
-Route::get('/devices', 'UserController@listAccess');
-//});
-Route::post('/authenticate', 'UserController@login');
+Route::group(['middleware' => ['jwt.verify']], function() {
+    Route::get('/devices/removeaccess', 'UserController@removeAllAccess'); // Response "OK"
+    Route::get('/notes/getShared/{id}', "NotesController@getShared");
+    Route::post('/notes/sync', 'NotesController@sync');
+    Route::get('/devices', [UserController::class, 'listAccess']);
+    Route::get('/ping', function() {
+        return "OK";
+    });
+});
+
+
+Route::post('/authenticate', [UserController::class, 'login']);

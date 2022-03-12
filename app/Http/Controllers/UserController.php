@@ -2,28 +2,52 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Models\User;
+use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller
 {
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        //$credentials = $request->only('email', 'password');
+        $yourpayload = $request->all();
 
+        /*
         try {
             if (! $token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'invalid_credentials'], 400);
             }
         } catch (JWTException $e) {
             return response()->json(['error' => 'could_not_create_token'], 500);
-        }
+        }*/
 
-        return response()->json(compact('token'));
+        //check google token and get user data
+
+        //if no existing account, then
+        /*
+        $account = Account::create([
+            'id' => Uuid::uuid6(),
+            'name' => 'Howard',
+            'email' => 'liehoward13@gmail.com',
+            'picture' => null,
+        ]);
+        $account->save();*/
+
+
+        $user = User::create([
+            'name' => 'Howard',
+            'email' => 'liehoward13@gmail.com',
+            'device_name' => 'meneketehek',
+            'account_id' => '1eca1d76-8ec5-6ffc-9051-8416f90a3d5d',
+        ]);
+        $token = JWTAuth::fromUser($user);
+        return response()->json(compact('yourpayload', 'token'));
     }
 
     public function register(Request $request)
