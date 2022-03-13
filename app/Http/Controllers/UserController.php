@@ -10,13 +10,32 @@ use Illuminate\Support\Facades\Validator;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Ramsey\Uuid\Uuid;
+use Google\AccessToken\Verify as GoogleVerifier;
+use DeviceDetector\DeviceDetector;
 
 class UserController extends Controller
 {
     public function login(Request $request)
     {
         //$credentials = $request->only('email', 'password');
-        $yourpayload = $request->all();
+        $payload = $request->all();
+        $gv = new GoogleVerifier();
+        $results = $gv->verifyIdToken($payload['payload']['idToken']);
+
+        if (empty($results['name']) || empty($results['email']) || empty($results['picture'])) {
+            return response()->json(['error' => 'invalid_credentials'], 400);
+        }
+
+        //check if account exists
+        $account = Account::where('email', $results['email'])->firstOrCreate([
+            'id' => Uuid::uuid6(),
+            'name' => $results['name'],
+            'email' => $results['email'],
+            'picture' => $results['picture']
+        ]);
+
+
+
 
         /*
         try {
@@ -26,28 +45,16 @@ class UserController extends Controller
         } catch (JWTException $e) {
             return response()->json(['error' => 'could_not_create_token'], 500);
         }*/
-
-        //check google token and get user data
-
-        //if no existing account, then
-        /*
-        $account = Account::create([
-            'id' => Uuid::uuid6(),
-            'name' => 'Howard',
-            'email' => 'liehoward13@gmail.com',
-            'picture' => null,
-        ]);
-        $account->save();*/
-
+        $dd = new DeviceDetector($_SERVER['HTTP_USER_AGENT']);
 
         $user = User::create([
-            'name' => 'Howard',
-            'email' => 'liehoward13@gmail.com',
-            'device_name' => 'meneketehek',
-            'account_id' => '1eca1d76-8ec5-6ffc-9051-8416f90a3d5d',
+            'name' => $results['name'],
+            'email' => $results['email'],
+            'device_name' => $dd->getDeviceName(),
+            'account_id' => $account['id'],
         ]);
         $token = JWTAuth::fromUser($user);
-        return response()->json(compact('yourpayload', 'token'));
+        return response()->json(compact('account', 'token'));
     }
 
     public function register(Request $request)
@@ -99,17 +106,26 @@ class UserController extends Controller
     }
 
     public function removeAllAccess() {
+        $current_user = auth()->user();
         // remove all access token from DB except the one logged in
+        $users = User::where('account_id', $current_user['account_id'])->where('id', '!=', $current_user['id'])->delete();
         return response()->json(['status' => "OK"]);
     }
 
     public function listAccess() {
+        $current_user = auth()->user();
         //get all token with same account from logged in
+        $users = User::where('id', $current_user['id'])->get();
 
-        return response()->json(['status' => 'OK', 'data' => [
-            'devices' => [
-                ['device_name' => 'Asus X00TD', 'id' => 1, 'created_at' => 'date'],
-            ]]
-        ]);
+        return response()->json($users);
+    }
+
+    public function logout()
+    {
+
+        $current_user = auth()->user();
+        auth()->logout();
+        User::where('id', $current_user['id'])->delete();
+        return response()->json(['message' => 'Successfully logged out']);
     }
 }

@@ -21,13 +21,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::group(['middleware' => ['jwt.verify']], function() {
-    Route::get('/devices/removeaccess', 'UserController@removeAllAccess'); // Response "OK"
-    Route::get('/notes/getShared/{id}', "NotesController@getShared");
-    Route::post('/notes/sync', 'NotesController@sync');
+    Route::get('/devices/removeaccess', [UserController::class ,'removeAllAccess']);
+    Route::get('/notes/getShared/{id}', [NoteController::class ,'getShared']);
+    Route::post('/notes/sync', [NoteController::class ,'sync']);
     Route::get('/devices', [UserController::class, 'listAccess']);
     Route::get('/ping', function() {
         return "OK";
     });
+    Route::get('/logout', [UserController::class, 'logout']);
 });
 
 
