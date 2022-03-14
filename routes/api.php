@@ -33,7 +33,7 @@ Route::group(['middleware' => ['cors']], function() {
 
     Route::post('/authenticate', [UserController::class, 'login']);
     Route::get('/ping', function() {
-        return "OK";
+        return response()->json(['status' => "OK"]);
     });
 });
 
