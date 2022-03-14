@@ -20,16 +20,20 @@ use App\Http\Controllers\UserController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::group(['middleware' => ['jwt.verify']], function() {
-    Route::get('/devices/removeaccess', [UserController::class ,'removeAllAccess']);
-    Route::get('/notes/getShared/{id}', [NoteController::class ,'getShared']);
-    Route::post('/notes/sync', [NoteController::class ,'sync']);
-    Route::get('/devices', [UserController::class, 'listAccess']);
+Route::group(['middleware' => ['cors']], function() {
+    Route::group(['middleware' => ['jwt.verify']], function() {
+        Route::get('/devices/removeaccess', [UserController::class ,'removeAllAccess']);
+        Route::get('/notes/getShared/{id}', [NoteController::class ,'getShared']);
+        Route::post('/notes/sync', [NoteController::class ,'sync']);
+        Route::get('/devices', [UserController::class, 'listAccess']);
+
+        Route::get('/logout', [UserController::class, 'logout']);
+    });
+
+
+    Route::post('/authenticate', [UserController::class, 'login']);
     Route::get('/ping', function() {
         return "OK";
     });
-    Route::get('/logout', [UserController::class, 'logout']);
 });
 
-
-Route::post('/authenticate', [UserController::class, 'login']);

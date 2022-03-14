@@ -27,7 +27,11 @@ class UserController extends Controller
         }
 
         //check if account exists
-        $account = Account::where('email', $results['email'])->firstOrCreate([
+        $account = Account::firstOrCreate(
+            [
+                'email' => $results['email']
+            ],
+        [
             'id' => Uuid::uuid6(),
             'name' => $results['name'],
             'email' => $results['email'],
@@ -37,6 +41,19 @@ class UserController extends Controller
 
 
 
+
+        $dd = new DeviceDetector($_SERVER['HTTP_USER_AGENT']);
+        $dd->parse();
+        $user = User::create([
+            'name' => $results['name'],
+            'email' => $results['email'],
+            'device_name' => $dd->getDeviceName(),
+            'account_id' => $account['id'],
+        ]);
+        $token = JWTAuth::fromUser($user);
+
+        return response()->json(compact('account', 'token'));
+
         /*
         try {
             if (! $token = JWTAuth::attempt($credentials)) {
@@ -45,16 +62,6 @@ class UserController extends Controller
         } catch (JWTException $e) {
             return response()->json(['error' => 'could_not_create_token'], 500);
         }*/
-        $dd = new DeviceDetector($_SERVER['HTTP_USER_AGENT']);
-
-        $user = User::create([
-            'name' => $results['name'],
-            'email' => $results['email'],
-            'device_name' => $dd->getDeviceName(),
-            'account_id' => $account['id'],
-        ]);
-        $token = JWTAuth::fromUser($user);
-        return response()->json(compact('account', 'token'));
     }
 
     public function register(Request $request)
@@ -115,9 +122,9 @@ class UserController extends Controller
     public function listAccess() {
         $current_user = auth()->user();
         //get all token with same account from logged in
-        $users = User::where('id', $current_user['id'])->get();
+        $users = User::where('account_id', $current_user['account_id'])->get();
 
-        return response()->json($users);
+        return response()->json(['status' => "OK", 'devices' => $users]);
     }
 
     public function logout()
@@ -126,6 +133,6 @@ class UserController extends Controller
         $current_user = auth()->user();
         auth()->logout();
         User::where('id', $current_user['id'])->delete();
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['message' => 'Successfully logged out', 'status' => "OK"]);
     }
 }
