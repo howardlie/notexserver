@@ -11,13 +11,15 @@ class NotesController extends Controller
 {
 
     public function sync() {
-
+        
     }
 
     public function getShared($id) {
         $note = Note::where('shared', 1)->where('id', $id)->first();
         if (empty($note)) {
             return response()->json(['status' => 'Error', 'message' => 'Note not Found']);
+        } else {
+            return response()->json(['status' => 'OK', 'note' => $note]);
         }
 
         
