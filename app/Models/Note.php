@@ -16,7 +16,7 @@ class Note extends Model
 {
     /**
      * The "type" of the auto-incrementing ID.
-     * 
+     *
      * @var string
      */
     protected $keyType = 'string';
@@ -26,7 +26,7 @@ class Note extends Model
 
     /**
      * Indicates if the IDs are auto-incrementing.
-     * 
+     *
      * @var bool
      */
     public $incrementing = false;
@@ -34,5 +34,10 @@ class Note extends Model
     /**
      * @var array
      */
-    protected $fillable = ['title', 'text', 'account_id', 'reminder_datetime', 'shared'];
+    protected $fillable = ['title', 'text', 'account_id', 'reminder_datetime', 'shared', 'created_at', 'updated_at'];
+
+    public function shared_to()
+    {
+        return $this->belongsToMany(Note::class);
+    }
 }

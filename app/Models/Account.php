@@ -32,4 +32,9 @@ class Account extends Model
      * @var array
      */
     protected $fillable = ['id', 'name', 'email', 'picture'];
+
+    public function shared_notes()
+    {
+        return $this->belongsToMany(Note::class);
+    }
 }
