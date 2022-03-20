@@ -17,13 +17,13 @@ class NotesController extends Controller
         $client_notes = request()->input('notes');
         $account = auth()->user()->account;
         $NoteDB = new Note();
-        $server_notes = $NoteDB->where('account_id', $account->id)->get();
-        $server_shared_notes; //get server shared notes for this account
+        $server_notes = $NoteDB->where('account_id', $account->id)->get()->toArray();
+        //$server_shared_notes; //get server shared notes for this account
         $response_notes = [];
         $response_patchs = [];
         $duplicate_notes = [];
         foreach ($client_notes as $key => $client_note) {
-            $server_notes_key = array_search($client_note['id'], array_column($server_notes->to_array(), 'id'));
+            $server_notes_key = array_search($client_note['id'], array_column($server_notes, 'id'));
 
             if (!$server_notes_key) {
                 $note = Note::create([
@@ -35,11 +35,13 @@ class NotesController extends Controller
                     'version' => 0,
                     'status' => $client_note['status'],
                     'reminder_datetime' => $client_note['reminder_datetime'],
-                    'id' => $client_note['id']
+                    'id' => $client_note['id'],
+                    'text' => ''
                 ]);
                 //$note->save();
             } else {
                 $note = $server_notes[$server_notes_key];
+                $note = Note::create($note);
             }
             // tidak mungkin versi server lebih low dr ekspektasi
             // if patch if empty (cuman update)
@@ -87,23 +89,6 @@ class NotesController extends Controller
                     array_push($duplicate_notes, $note->id);
                     // suruh client duplicate
                 }
-
-                /*elseif ($client_note['patches'][0]['version']-1 > $note->version) {
-
-                    if ($client_note['hash'] != md5($note->text)) {
-                        $dupNote = $note;
-                        $dupNote->title = 'Conflicting Note of ' . $dupNote->title;
-                        $dupNote->save();
-                        // error no text
-                        array_push($response_notes, $dupNote);
-                    }
-                } else {
-                    if (($note->version - $client_note['version']) <= 3) {
-                        //send patches
-                    } else {
-                        array_push($response_notes, $note)
-                    }
-                }*/
             }
 
         }

@@ -24,7 +24,7 @@ Route::group(['middleware' => ['cors']], function() {
     Route::group(['middleware' => ['jwt.verify']], function() {
         Route::get('/devices/removeaccess', [UserController::class ,'removeAllAccess']);
         Route::get('/notes/getShared/{id}', [NotesController::class ,'getShared']);
-        Route::post('/notes/sync', [NotesController::class ,'sync']);
+        Route::any('/notes/sync', [NotesController::class ,'sync']);
         Route::get('/devices', [UserController::class, 'listAccess']);
 
         Route::get('/logout', [UserController::class, 'logout']);
