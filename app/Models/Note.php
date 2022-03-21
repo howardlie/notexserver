@@ -34,7 +34,7 @@ class Note extends Model
     /**
      * @var array
      */
-    protected $fillable = ['title', 'text', 'account_id', 'reminder_datetime', 'shared', 'created_at', 'updated_at', 'id', 'text'];
+    protected $fillable = ['title', 'text', 'account_id', 'reminder_datetime', 'shared', 'created_at', 'updated_at', 'id', 'text', 'version'];
 
     public function shared_to()
     {

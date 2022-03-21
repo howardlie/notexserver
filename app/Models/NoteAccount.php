@@ -11,4 +11,6 @@ class NoteAccount extends Model
 
 
     protected $fillable = ['note_id', 'account_id'];
+    protected $table = 'account_note';
+    public $timestamps = false;
 }
