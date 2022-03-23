@@ -22,7 +22,9 @@ class NotesController extends Controller
         $duplicate_notes = [];
         //array_push($response_notes, $account);
         $shared_server_notes = $account->shared_notes->toArray();
-        $server_notes = $NoteDB->where('account_id', $account->id)->get()->toArray();
+        $server_notes = $NoteDB->where('account_id', $account->id)->with(['patches' => function ($query) {
+        	$query->orderBy('version', 'DESC')->limit(10);
+        }])->get()->toArray();
         $server_notes = array_merge($server_notes, $shared_server_notes);
         //$server_shared_notes; //get server shared notes for this account
 
@@ -58,12 +60,13 @@ class NotesController extends Controller
 
 
                     // if server lebih tinggi maka update, client tidak mungkin lebih tinggi kalau tanpa patch
-                } elseif (($note->version - $client_note['version']) <= 3) {
-                    $patch = NotesPatch::where('note_id', $note->id)->whereIn('version', [$note->version, $note->version-1, $note->version-2])->get();
+                } elseif (($note->version - $client_note['version']) <= 10) {
+                    $patch = NotesPatch::where('note_id', $note->id)->where('version', '>',$note->version-10)->get();
                     //send patch
                     array_push($response_patchs, $patch);
                 } else {
                     //send full text
+                    //include patchs
                     array_push($response_notes, $note);
                 }
 
@@ -95,10 +98,6 @@ class NotesController extends Controller
                 }
             }
             Note::where('id', $note->id)->update($note->toArray());
-
-
-
-
 
         }
 

@@ -40,4 +40,9 @@ class Note extends Model
     {
         return $this->belongsToMany(Note::class);
     }
+
+    public function patches()
+    {
+        return $this->hasMany(NotesPatch::class);
+    }
 }
